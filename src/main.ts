@@ -1,3 +1,6 @@
+import { ppid } from "process";
+import { clearLine } from "readline";
+
 interface ColorMap {
   black: string;
   red: string;
@@ -126,6 +129,40 @@ function applyStringStyles(stringObject: StringStyles): string {
   return stringObject.resetAfter ? styledString + "\x1b[0m" : styledString;
 }
 
+function loadingAnimationTwirl() {
+  const characters = ["|", "/", "--", "\\"];
+  let i = 0;
+
+  return setInterval(() => {
+    i = i > 3 ? 0 : i;
+    process.stdout.write("\rLoading " + characters[i]);
+
+    i++;
+  }, 250);
+}
+
+function stopAnimation(intervalID: NodeJS.Timer) {
+  clearInterval(intervalID);
+  clearLine(process.stdout, 0); // Deletes line of text
+  process.stdout.write("\rDone\n");
+}
+
+function loadingAnimation(
+  text = "",
+  chars = ["⠙", "⠘", "⠰", "⠴", "⠤", "⠦", "⠆", "⠃", "⠋", "⠉"],
+  delay = 100
+) {
+  let x = 0;
+
+  return setInterval(function () {
+    process.stdout.write("\r" + chars[x++] + " " + text);
+    x = x % chars.length;
+  }, delay);
+}
+
+// ---------- Tests ---------- //
+console.clear();
+
 colorfulConsole([
   {
     string: "First String, ",
@@ -149,3 +186,12 @@ colorfulConsole([
     foregroundColor: "bright-green",
   },
 ]);
+
+const twirl = loadingAnimationTwirl();
+setTimeout(() => {
+  stopAnimation(twirl);
+}, 5000);
+// const loading = loadingAnimation("Loading");
+// setTimeout(() => {
+//   clearInterval(loading);
+// }, 5000);

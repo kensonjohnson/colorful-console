@@ -1,4 +1,6 @@
-# [Console Methods](https://developer.mozilla.org/en-US/docs/Web/API/console "MDN Documentation")
+# Gathered Explainations
+
+## [Console Methods](https://developer.mozilla.org/en-US/docs/Web/API/console "MDN Documentation")
 
 | Name                                                                                                                    | Description                                                                                                                                                                                                                                                                                                                                                      |
 | :---------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -23,7 +25,10 @@
 | [console.trace()](https://developer.mozilla.org/en-US/docs/Web/API/console/trace "MDN Documentation")                   | Outputs a [stack trace](https://developer.mozilla.org/en-US/docs/Web/API/console#stack_traces "MDN Documentation").                                                                                                                                                                                                                                              |
 | [console.warn()](https://developer.mozilla.org/en-US/docs/Web/API/console/warn "MDN Documentation")                     | Outputs a warning message. You may use [string substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions "MDN Documentation") and additional arguments with this method.                                                                                                                                                 |
 
-# [String Substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions "MDN Documentation")
+&nbsp;
+&nbsp; |
+
+## [String Substitution](https://developer.mozilla.org/en-US/docs/Web/API/console#using_string_substitutions "MDN Documentation")
 
 | Type    | Symbol   | Explaination                                                                                                                                                             |
 | :------ | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -34,11 +39,12 @@
 
 **Precision formatting doesn't work in Chrome.**
 
-<br>
+&nbsp;
+&nbsp;
 
-# [Styles and Decorations](<https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters> "Link to Wikipedia")
+## [Styles and Decorations](<https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters> "Link to Wikipedia")
 
-## Styles
+### Styles
 
 | Type       | Add      | Remove   |
 | :--------- | :------- | :------- |
@@ -52,11 +58,12 @@
 | Hidden     | \x1b[8m  | \x1b[28m |
 | Strike     | \x1b[9m  | \x1b[29m |
 
-<br>
+&nbsp;
+&nbsp;
 
-# [Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#Colors "Link to Wikipedia")
+## [Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#Colors "Link to Wikipedia")
 
-## [Built-in (ANSI) Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit "Link to Wikipedia")
+### [Built-in (ANSI) Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit "Link to Wikipedia")
 
 | Colors  | Foreground | Background | BrightFG | BrightBG  |
 | :------ | :--------- | :--------- | :------- | :-------- |
@@ -70,28 +77,111 @@
 | White   | \x1b[37m   | \x1b[47m   | \x1b[97m | \x1b[107m |
 | Default | \x1b[39m   | \x1b[49m   | \x1b[39m | \x1b[49m  |
 
-<br>
+&nbsp;
+&nbsp;
 
-## [8-Bit Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit "Link to Wikipedia")
+### [8-Bit Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit "Link to Wikipedia")
 
 Use the escape sequence `\x1b[38;5;<n>m` for foreground and `\x1b[48;5;<n>m` for background.
 
 Replace `<n>` with the [8-bit color code](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit "Link to Wikipedia") you want.
 
-```
+```node
 console.log("\x1b[38;5;20m%s\x1b[0m", "8-bit Text"); // Blue foreground (text)
 console.log("\x1b[48;5;214m%s\x1b[0m", "8-bit Background"); // Orange background
 ```
 
-<br>
+&nbsp;
+&nbsp;
 
-## [RGB (24-Bit) Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit "Link to Wikipedia")
+### [RGB (24-Bit) Colors](https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit "Link to Wikipedia")
 
 Use the escape sequence `\x1b[38;2;<r>;<g>;<b>m` for foreground and `\x1b[48;2;<r>;<g>;<b>m` for background.
 
 Replace `<r>`,`<g>`, and `<b>` with the [24-bit color](https://www.rapidtables.com/web/color/RGB_Color.html) you like.
 
-```
+```node
 console.log("\x1b[38;2;255;51;51m%s\x1b[0m", "24-bit Text"); // Red foreground (text)
 console.log("\x1b[48;2;255;255;0m%s\x1b[0m", "24-bit Background"); // Yellow background
 ```
+
+&nbsp;
+&nbsp;
+
+## Controlling Console Output
+
+There are a few [escape strings](https://en.wikipedia.org/wiki/Escape_character#JavaScript "Link to Wikipedia Page") that we can use to control the output of our console.
+The most notable of which is the carriage return `\r` and new line `\n`.
+These imitate an old school typewriter:
+
+- Carriage return `\r` moves the cursor back to the start of the line.
+- New line `\n`, or "line feed", moves the cursor to the next line down.
+
+What's important to note is that returning to the start of a line with `\r` allows you to **_overwrite_** what was already there.
+We can use this to create a loading spinner:
+
+```node
+function loadingAnimation() {
+  const characters = ["|", "/", "--", "\\"];
+  let i = 0;
+
+  return setInterval(() => {
+    i = i === characters.length ? 0 : i;
+    process.stdout.write("\rLoading " + characters[i]);
+    i++;
+  }, 250);
+}
+
+function stopAnimation(intervalID) {
+  clearInterval(intervalID);
+  clearLine(process.stdout, 0); // Deletes the current line of text
+  process.stdout.write("\rDone\n");
+}
+```
+
+Calling this function creates an interval that updates the console every 250ms, and returns it's id.
+Just call it and the animation runs until you clear the timeout:
+
+```node
+const twirl = loadingAnimation();
+
+// some blocking code that takes awhile
+
+stopAnimation(twirl);
+```
+
+It's important to call the `stopAnimation()`, which calls `clearInterval()` under the hood.
+Otherwise, the animation wouldn't stop, regardless of other console logs come in afterwards.
+
+Other escape characters include:
+|||
+|:---|:---|
+|\f| matches form-feed. |
+|\r| matches carriage return.|
+|\n| matches linefeed.|
+|\t| matches horizontal tab.|
+|\v| matches vertical tab.|
+|\0| matches NUL character.|
+|[\b]| matches backspace.|
+|\s| matches whitespace (short for [\f\n\r\t\v\u00A0\u2028\u2029]).|
+|\S| matches anything but a whitespace (short for [^\f\n\r\t\v\u00a0\u2028\u2029]).|
+|\w| matches any alphanumerical character (word characters) including underscore (short for [a-zA-Z0-9_]).|
+|\W| matches any non-word characters (short for [^a-za-z0-9_]).|
+|\d| matches any digit (short for [0-9]).|
+|\D| matches any non-digit (short for [^0-9]).|
+|\b| matches a word boundary (the position between a word and a space).|
+|\B| matches a non-word boundary (short for [^\b]).|
+|\cX| matches a control character. E.g: \cm matches control-M.|
+|\xhh| matches the character with two characters of hexadecimal code hh.|
+|\uhhhh| matches the Unicode character with four characters of hexadecimal code hhhh.|
+|\u001b7| Saves the current cursor position.|
+|u001b8| Restores the cursor position to the saved position.|
+
+&nbsp;
+&nbsp;
+
+## Moving the Cursor Around
+
+<https://tldp.org/HOWTO/Bash-Prompt-HOWTO/x361.html>
+
+<https://github.com/ivanseidel/node-draftlog>
